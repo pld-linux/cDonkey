@@ -12,7 +12,7 @@ BuildRequires:	automake
 BuildRequires:	db-devel >= 4.1
 BuildRequires:	libtool
 BuildRequires:	openssl-devel
-BuildRequires:	zlib-devel 
+BuildRequires:	zlib-devel
 BuildRoot:	%{tmpdir}/%{name}-%{version}-root-%(id -u -n)
 Provides:	eDonkey-core
 
