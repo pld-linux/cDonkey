@@ -1,0 +1,13 @@
+--- cDonkey-0.9.0/configure.in.orig	2003-03-09 20:36:51.000000000 +0000
++++ cDonkey-0.9.0/configure.in	2003-11-18 15:01:07.000000000 +0000
+@@ -48,8 +48,8 @@
+ AC_CONFIG_HEADER([config.h])
+ AC_CHECK_LIB([z], [zlibVersion])
+ dnl This need sun
+-AC_CHECK_LIB([nsl], [gethostbyaddr])
+-AC_CHECK_LIB([socket], [socket]) 
++AC_SEARCH_LIBS([gethostbyaddr], [nsl])
++AC_SEARCH_LIBS([socket], [socket]) 
+ CXXFLAGS="$CXXFLAGS"
+ AC_SUBST(CXXFLAGS)
+ 
