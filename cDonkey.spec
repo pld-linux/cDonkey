@@ -1,7 +1,7 @@
 Summary:	Open source core client for eDonkey
 Summary(pl):	Otwarty rdzeñ klienta sieci eDonkey
 Name:		cDonkey
-Version:	0.5.3
+Version:	0.8.9
 Release:	1
 License:	GPL
 Group:		Applications/Communications
@@ -48,4 +48,4 @@ rm -rf $RPM_BUILD_ROOT
 %files
 %defattr(644,root,root,755)
 %attr(755,root,root) %{_bindir}/*
-%doc TODO
+%doc TODO FAQ-EN README
