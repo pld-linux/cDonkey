@@ -2,18 +2,20 @@ Summary:	Open source core client for eDonkey
 Summary(pl):	Otwarty rdzeñ klienta sieci eDonkey
 Name:		cDonkey
 Version:	0.9.0
-Release:	1
+Release:	2
 License:	GPL
 Group:		Applications/Communications
 Source0:	http://suche.org/%{name}-%{version}.tar.bz2
 # Source0-md5:	04c7b16e2aeb18a246e9892ba6fe7b7a
 Patch0:		%{name}-in_addr.patch
+Patch1:		%{name}-types.patch
+Patch2:		%{name}-nolibs.patch
 URL:		http://cdonkey.suche.org/
 BuildRequires:	autoconf
 BuildRequires:	automake
 BuildRequires:	db-devel >= 4.1
+BuildRequires:	libstdc++-devel
 BuildRequires:	libtool
-BuildRequires:	openssl-devel >= 0.9.7c
 BuildRequires:	zlib-devel
 BuildRoot:	%{tmpdir}/%{name}-%{version}-root-%(id -u -n)
 Provides:	eDonkey-core
@@ -32,17 +34,21 @@ wersji 4.1 do szybkiego zarz±dzania listami. Dzia³a tylko na Linuksie.
 %prep
 %setup -q
 %patch0 -p1
+%patch1 -p1
+%patch2 -p1
 
 %build
 %{__libtoolize}
 %{__aclocal}
 %{__autoconf}
+%{__autoheader}
 %{__automake}
 %configure
 %{__make}
 
 %install
 rm -rf $RPM_BUILD_ROOT
+
 install -D cDonkey $RPM_BUILD_ROOT%{_bindir}/cDonkey
 
 %clean
@@ -50,5 +56,5 @@ rm -rf $RPM_BUILD_ROOT
 
 %files
 %defattr(644,root,root,755)
-%attr(755,root,root) %{_bindir}/*
 %doc TODO FAQ-EN README
+%attr(755,root,root) %{_bindir}/*
