@@ -24,7 +24,7 @@ was implemented. It currently only works with Linux.
 
 %description -l pl
 cDonkey jest otwartym rdzeniem klienta sieci eDonkey bez interfejsu
-graficznego. Wpó³gra z eMule oraz ed2k_gui. U¿ywa bazy Berkeley w
+graficznego. Wspó³gra z eMule oraz ed2k_gui. U¿ywa bazy Berkeley w
 wersji 4.1 do szybkiego zarz±dzania listami. Dzia³a tylko na Linuksie.
 
 %prep
