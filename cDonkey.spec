@@ -2,7 +2,7 @@ Summary:	Open source core client for eDonkey
 Summary(pl):	Otwarty rdzeñ klienta sieci eDonkey
 Name:		cDonkey
 Version:	0.9.0
-Release:	2
+Release:	3
 License:	GPL
 Group:		Applications/Communications
 Source0:	http://suche.org/%{name}-%{version}.tar.bz2
