@@ -1,6 +1,6 @@
 Summary:	Open source core client for eDonkey
 Name:		cDonkey
-Version:	0.5.0
+Version:	0.5.2
 Release:	1
 License:	GPL
 Group:		Applications/Communications
@@ -18,7 +18,7 @@ fast List management. The eMule Packet data and source2source exchange
 was implemented. It currently only works with Linux.
 
 %prep
-%setup -q
+%setup -q -n %{name}
 
 %build
 %{__libtoolize}
