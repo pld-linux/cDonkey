@@ -1,12 +1,13 @@
 Summary:	Open source core client for eDonkey
 Summary(pl):	Otwarty rdzeñ klienta sieci eDonkey
 Name:		cDonkey
-Version:	0.8.9
+Version:	0.9.0
 Release:	1
 License:	GPL
 Group:		Applications/Communications
 Source0:	http://suche.org/%{name}-%{version}.tar.bz2
-# Source0-md5:	a1a5eb43697b8f098f80709f017ab84c
+# Source0-md5:	04c7b16e2aeb18a246e9892ba6fe7b7a
+Patch0:		%{name}-in_addr.patch
 URL:		http://cdonkey.suche.org/
 BuildRequires:	autoconf
 BuildRequires:	automake
@@ -29,7 +30,8 @@ graficznego. Wspó³gra z eMule oraz ed2k_gui. U¿ywa bazy Berkeley w
 wersji 4.1 do szybkiego zarz±dzania listami. Dzia³a tylko na Linuksie.
 
 %prep
-%setup -q -n %{name}
+%setup -q
+%patch0 -p1
 
 %build
 %{__libtoolize}
