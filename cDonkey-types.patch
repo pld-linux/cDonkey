@@ -1,0 +1,747 @@
+--- cDonkey-0.9.0/misc.h.orig	2003-05-03 19:48:49.000000000 +0000
++++ cDonkey-0.9.0/misc.h	2003-11-18 14:58:29.000000000 +0000
+@@ -160,7 +160,7 @@
+ unsigned cntFiles    (void);
+ unsigned cntSource   (void);
+ unsigned cntServer   (void);
+-bool encode64(const char *_in, unsigned inlen, char *_out, size_t  outmax, size_t *outlen);
++bool encode64(const char *_in, size_t inlen, char *_out, size_t  outmax, size_t *outlen);
+ bool decode64(const char * in, unsigned inlen, char * out, size_t *outlen);
+ 
+ 
+--- cDonkey-0.9.0/sCommand.cpp.orig	2003-03-31 23:01:10.000000000 +0000
++++ cDonkey-0.9.0/sCommand.cpp	2003-11-18 14:42:51.000000000 +0000
+@@ -142,12 +142,12 @@
+ 	if (0 == strncasecmp ("mcon "            , text, strlen ("mcon "            ))) {{{
+ 		TCP_CLIENT_COUNT = atoi (text + strlen("mcon "));
+ 		TCP_SERVER_COUNT = atoi (text + strlen("mcon "));
+-		len = snprintf(out, 128, "max connection = %i\n", TCP_CLIENT_COUNT);
++		len = snprintf(out, 128, "max connection = %zi\n", TCP_CLIENT_COUNT);
+ 		goto done;
+ 		}}}
+ 	if (0 == strncasecmp ("TCP_CLIENT_COUNT ", text, strlen ("TCP_CLIENT_COUNT "))) {{{
+ 		TCP_CLIENT_COUNT = atoi (text + strlen("TCP_CLIENT_COUNT "));
+-		len = snprintf(out, 128, "TCP client count = %i\n", TCP_CLIENT_COUNT);
++		len = snprintf(out, 128, "TCP client count = %zi\n", TCP_CLIENT_COUNT);
+ 		goto done;
+ 		}}}
+ 	if (0 == strncasecmp ("TCP_SERVER_COUNT ", text, strlen ("TCP_SERVER_COUNT "))) {{{
+@@ -200,7 +200,7 @@
+ 		goto done;
+ 		}}}
+ 	if (0 == strncasecmp ("vc "              , text, strlen ("vc"               ))) {{{
+-		len = snprintf(out, 128, "%u contacts", overnet.getNumContacts());
++		len = snprintf(out, 128, "%zu contacts", overnet.getNumContacts());
+ 		goto done;
+ 		}}}
+ 	if (0 == strncasecmp ("s "               , text, strlen ("s"                ))) {{{
+--- cDonkey-0.9.0/kademlia.cpp.orig	2003-05-07 18:21:34.000000000 +0000
++++ cDonkey-0.9.0/kademlia.cpp	2003-11-18 14:53:10.000000000 +0000
+@@ -87,7 +87,7 @@
+ 	if (boot_done) return;
+ 	size_t cnt = overnet.getNumContacts();
+ 	if (cnt > 0) {
+-		printf("Read %u from contact.dat\n", cnt);
++		printf("Read %zu from contact.dat\n", cnt);
+ 		boot_done = true;
+ 		return;
+ 		}
+@@ -137,7 +137,7 @@
+ 	logSend('>', OVERNET_CONNECT, 24 );
+ 	unsigned char BUF[24];
+ 	unsigned char *buf = BUF;
+-	unsigned int  len = 24;
++	size_t  len = 24;
+ 	ADD_U1	(&buf, &len, OP_EDONKEYHEADER);
+ 	ADD_U1	(&buf, &len, OVERNET_CONNECT);
+ 	ADD_HASH(&buf, &len, seek_hash);
+@@ -191,7 +191,7 @@
+ 	logSend('>', OVERNET_HELLO_ACK,  2 );
+ 	unsigned char BUF[2];
+ 	unsigned char *buf = BUF;
+-	unsigned len = 2;
++	size_t len = 2;
+ 	ADD_U1 (&buf, &len, OP_EDONKEYHEADER);
+ 	ADD_U1 (&buf, &len, OVERNET_HELLO_ACK);
+ 	Write  (BUF, 2);
+@@ -201,7 +201,7 @@
+ 	logSend('>', OVERNET_REQUEST, 19 );
+ 	unsigned char BUF[19];
+ 	unsigned char *buf = BUF;
+-	unsigned int  len, LEN = len = 19;
++	size_t len, LEN = len = 19;
+ 	ADD_U1	(&buf, &len, OP_EDONKEYHEADER);
+ 	ADD_U1	(&buf, &len, OVERNET_REQUEST);
+ 	ADD_U1	(&buf, &len, for_type);
+@@ -293,7 +293,7 @@
+ 	logSend('>', OVERNET_SEARCH_END, 22);
+ 	unsigned char BUF[22];
+ 	unsigned char *buf = BUF;
+-	unsigned len = 22;
++	size_t len = 22;
+ 	ADD_U1   (&buf, &len, OP_EDONKEYHEADER);
+ 	ADD_U1   (&buf, &len, OVERNET_SEARCH_END);
+ 	ADD_HASH (&buf, &len, p_hash);
+@@ -305,7 +305,7 @@
+ bool     cKademlia::send_Publish           (const uint8_t *key, size_t size, const char* name) {{{ // (0x13) Publish an meta description
+ 	ASSERT(name != NULL);
+ 	ASSERT(key  != NULL);
+-	unsigned len, LEN = len = 52+strlen(name);
++	size_t len, LEN = len = 52+strlen(name);
+ 	unsigned char *buf, *BUF = buf = reinterpret_cast<unsigned char*>(alloca(LEN));
+ 	logSend('>', OVERNET_PUBLISH_REQ, len);
+ 	ADD_U1     (&buf, &len, OP_EDONKEYHEADER);
+@@ -320,7 +320,7 @@
+ 	return true;
+ 	}}}
+ bool     cKademlia::send_Publish_ack       (const uint8_t * p_hash   ) {{{ // (0x14) acknowlegde the send_Publish
+-	unsigned len, LEN = len = 18;
++	size_t len, LEN = len = 18;
+ 	unsigned char BUF[18], *buf = BUF;
+ 	ADD_U1     (&buf, &len, OP_EDONKEYHEADER);
+ 	ADD_U1     (&buf, &len, OVERNET_PUBLISH_ACK);
+@@ -332,7 +332,7 @@
+ 	}}}
+ bool     cKademlia::send_Identify_reply    (void) {{{   // (0x15)
+ 	logSend('>', OVERNET_IDENTIFY_RES, 25);
+-	unsigned int  len = 25;
++	size_t len = 25;
+ 	unsigned char BUF[25];
+ 	unsigned char *buf = BUF;
+ 	ADD_U1	(&buf, &len, OP_EDONKEYHEADER);
+@@ -345,7 +345,7 @@
+ 	}}}
+ bool     cKademlia::send_Identify_ack      (void) {{{   // (0x16)
+ 	logSend('>',OVERNET_IDENTIFY_ACK,  4);
+-	unsigned int  len = 4;
++	size_t len = 4;
+ 	unsigned char BUF[4];
+ 	unsigned char *buf = BUF;
+ 	ADD_U1	(&buf, &len, OP_EDONKEYHEADER);
+@@ -369,7 +369,7 @@
+ bool     cKademlia::send_IP_query          (void) {{{ // (0x1B) Ask after BOOT what the other see as my ip
+ 	unsigned char BUF[4];
+ 	unsigned char *buf = BUF;
+-	unsigned len, LEN = len = 4;
++	size_t len, LEN = len = 4;
+ 	ADD_U1	(&buf, &len, OP_EDONKEYHEADER);
+ 	ADD_U1	(&buf, &len, OVERNET_IP_REQ);
+ 	ADD_U2	(&buf, &len, pref.ports.client);
+@@ -380,7 +380,7 @@
+ bool     cKademlia::send_IP_answer         (void) {{{ // (0x1C) Answer for send_IP_query
+ 	unsigned char BUF[6];
+ 	unsigned char *buf = BUF;
+-	unsigned len, LEN = len = 6;
++	size_t len, LEN = len = 6;
+ 	ADD_U1 (&buf, &len, OP_EDONKEYHEADER);
+ 	ADD_U1 (&buf, &len, OVERNET_IP_RES);
+ 	ADD_U4 (&buf, &len, peer_ip.s_addr);
+@@ -391,7 +391,7 @@
+ bool     cKademlia::send_IP_end            (void) {{{ // (0x1D) returned after send_IP_answer
+ 	unsigned char BUF[2];
+ 	unsigned char *buf = BUF;
+-	unsigned len, LEN = len = 2;
++	size_t len, LEN = len = 2;
+ 	ADD_U1 (&buf, &len, OP_EDONKEYHEADER);
+ 	ADD_U1 (&buf, &len, OVERNET_IP_ACK);
+ 	logSend('>', OVERNET_IP_ACK,  LEN);
+@@ -401,7 +401,7 @@
+ bool     cKademlia::send_Identify          (void) {{{ // (0x1E) 
+ 	unsigned char BUF[2];
+ 	unsigned char *buf = BUF;
+-	unsigned len, LEN = len = 2;
++	size_t len, LEN = len = 2;
+ 	ADD_U1 (&buf, &len, OP_EDONKEYHEADER);
+ 	ADD_U1 (&buf, &len, OVERNET_SEARCH_END);
+ //	logSend('>', 0x1E,  LEN);
+@@ -423,7 +423,7 @@
+ 	}}}
+ // }}}
+ // recv {{{
+-void	    cKademlia::parsePeer_lst          (unsigned char **buf , unsigned *len, unsigned cnt) {{{
++void	    cKademlia::parsePeer_lst          (unsigned char **buf , size_t *len, unsigned cnt) {{{
+ 	for (unsigned i = 0; i < cnt && *len >= 23; i++) {
+ 		uint8_t  p_hash[KAD_HASH_LEN];
+ 		GET_HASH (buf, len, p_hash);
+@@ -691,7 +691,7 @@
+ 		case 9  : 
+ 		case 0  : break;
+ 		}
+-	printf("%s %c 0x%04X overnet  [%15s](%9u) %-15s [%3u]", currentTime_str, dir, cmd, inet_ntoa(peer_ip), peer_port, op2str(cmd), len);
++	printf("%s %c 0x%04X overnet  [%15s](%9u) %-15s [%3zu]", currentTime_str, dir, cmd, inet_ntoa(peer_ip), peer_port, op2str(cmd), len);
+ 	if (!extra) printf("\n");
+ 	return true;
+ 	}}}
+@@ -731,7 +731,7 @@
+ 		case 0x21 : break; // TODO WARNING unclear if this opcode is real or an bug
+ 		default   : printf("Protocol %3u (0x%0X) (overnet) (%15s:%5u)\n", proto  , proto, inet_ntoa(peer_ip), peer_port);
+ 			    printf("Command  %3u (0x%0X) (overnet)\n", cmd, cmd);
+-			    printf("len:     %u\n", LEN);
++			    printf("len:     %zu\n", LEN);
+ 			    dump (BUF, LEN);
+ 			    break;
+ 			}
+--- cDonkey-0.9.0/protocol.cpp.orig	2003-05-03 19:48:50.000000000 +0000
++++ cDonkey-0.9.0/protocol.cpp	2003-11-18 14:18:18.000000000 +0000
+@@ -13,7 +13,7 @@
+ 
+ class sTag *parseTag  (class sPacket *packet) {{{
+ 	unsigned char *data   = packet->DATA();
+-	unsigned len = packet->Unused();
++	size_t len = packet->Unused();
+ 	sTag *ret = parse_tag(data, &len);
+ 	packet->GET_BLIND(len);
+ 	return ret;
+--- cDonkey-0.9.0/cZone.cpp.orig	2003-05-07 18:21:34.000000000 +0000
++++ cDonkey-0.9.0/cZone.cpp	2003-11-18 14:53:53.000000000 +0000
+@@ -369,12 +369,12 @@
+ 	sprintf(ZoneIndex, "%32s", hash_bin2hex(m_zoneIndex));
+ 	if (prefix == NULL) printf("------------------------------------------------------\n");
+ 	if (isLeaf()) {
+-		printf("Zone level: %i\tZone prefix: %s\tContacts: %i\tZoneIndex: %s\n", 
++		printf("Zone level: %i\tZone prefix: %s\tContacts: %zi\tZoneIndex: %s\n", 
+ 				m_level, (prefix == NULL) ? "ROOT" : prefix, getNumContacts(), ZoneIndex);
+ 		m_bin->dumpContents();
+ 		}
+ 	else {
+-		printf("Zone level: %i\tZone prefix: %s\tContacts: %i\tZoneIndex: %s NODE\n", 
++		printf("Zone level: %i\tZone prefix: %s\tContacts: %zi\tZoneIndex: %s NODE\n", 
+ 				m_level, (prefix == NULL) ? "ROOT" : prefix, getNumContacts(), ZoneIndex);
+ 		char msg[512];
+ 		sprintf(msg, "%s0", (prefix == NULL) ? "" : prefix);
+--- cDonkey-0.9.0/sTag.cpp.orig	2003-04-05 18:06:46.000000000 +0000
++++ cDonkey-0.9.0/sTag.cpp	2003-11-18 14:43:57.000000000 +0000
+@@ -65,7 +65,7 @@
+ 	*dst = *src;
+ 	*src = NULL;
+ 	}}}
+-sTag *parse_tag (unsigned char *data, unsigned *len) {{{
++sTag *parse_tag (unsigned char *data, size_t *len) {{{
+ 	ASSERT (NULL != data);
+ 	ASSERT (NULL != len );
+ 	if (data == NULL) {{{
+--- cDonkey-0.9.0/donkey.cpp.orig	2003-05-07 18:26:57.000000000 +0000
++++ cDonkey-0.9.0/donkey.cpp	2003-11-18 14:13:22.000000000 +0000
+@@ -336,7 +336,7 @@
+ 	printf("sSource::count => %i\n", sSource::count);
+ 	printf("sSource::count0=> %i\n", sSource::count0);
+ 	printf("sSource::count1=> %i\n", sSource::count1);
+-	printf("cSocket::count => %i\n", cSocket::count);
++	printf("cSocket::count => %zi\n", cSocket::count);
+ 	printf("sTag   ::count => %i\n", sTag::count);
+ 	}}}
+ 
+--- cDonkey-0.9.0/sPacket.cpp.orig	2003-04-29 15:33:39.000000000 +0000
++++ cDonkey-0.9.0/sPacket.cpp	2003-11-18 14:17:44.000000000 +0000
+@@ -164,8 +164,8 @@
+ 	}}}
+ void        sPacket::Dump     (void) const {{{
+ 	printf("\r\nprotokol:%02x\r\n", proto);
+-	printf("length    : %u\r\n"   , pay_len);
+-	printf("position  : %#08X\r\n", pos);
++	printf("length    : %zu\r\n"   , pay_len);
++	printf("position  : %#08zX\r\n", pos);
+ 	unsigned tmp = opcode;
+ 	printf("command   : 0x%02hx\r\n", tmp);
+ 	for (uint32_t i=0; i < pay_len - 1; i++) {
+--- cDonkey-0.9.0/sGui.cpp.orig	2003-05-07 18:21:34.000000000 +0000
++++ cDonkey-0.9.0/sGui.cpp	2003-11-18 14:15:47.000000000 +0000
+@@ -122,7 +122,7 @@
+ 	unsigned limit = max_cnt * (78 + sizeof(s->name) + sizeof(s->desc));
+ 	unsigned char *buffer, *BUFFER = buffer = reinterpret_cast<unsigned char*>(alloca (limit));	
+ 	s = nextServers (true);
+-	unsigned unused = limit;
++	size_t unused = limit;
+ 	unsigned cnt = 0 ;
+ 	while (s != NULL) {	// we have reserved the maximum possible size
+ 		cnt++;
+@@ -156,7 +156,7 @@
+     	if (!auth) return 0;
+     	unsigned limit = 3000; // hardcoded ! BAD
+     	unsigned char *buffer, *BUFFER = buffer = reinterpret_cast<unsigned char*>(alloca (limit));
+-    	unsigned unused = limit;
++    	size_t unused = limit;
+     	unsigned cnt = 0 ;
+     	FILE_LIST {{{
+         if ( ! akt->get_Completed() ) continue;
+@@ -488,7 +488,7 @@
+ 	ADD_U4 (&buf, &len, TCP_CLIENT_COUNT);			// max connections
+ 	ADD_U4 (&buf, &len, 0x020c0800);			// core build date
+ 	ADD_F4 (&buf, &len,  (dlSecond + ulSecond) / 1024.0);	// line download speed
+-	if (len != 0) printf("len = %i\n", len);
++	if (len != 0) printf("len = %zi\n", len);
+ 	ASSERT (len == 0);
+ 	Write (BUF, LEN);
+ 	Code(0x01);
+--- cDonkey-0.9.0/kademlia.h.orig	2003-04-27 21:04:24.000000000 +0000
++++ cDonkey-0.9.0/kademlia.h	2003-11-18 14:52:23.000000000 +0000
+@@ -45,7 +45,7 @@
+ 
+ 	private:
+ 		bool	 logSend   (char dir, unsigned cmd, size_t len, bool extra = false);
+-		void     parsePeer_lst       	(unsigned char **buf , unsigned *len, unsigned cnt);
++		void     parsePeer_lst       	(unsigned char **buf , size_t *len, unsigned cnt);
+ 		void	 Init_Search		(void);
+ 		// send Handling {{{	
+ 		bool	 send_Connect 		(void			); // (0x0A) request boot list
+--- cDonkey-0.9.0/sSource.cpp.orig	2003-05-07 18:21:35.000000000 +0000
++++ cDonkey-0.9.0/sSource.cpp	2003-11-18 14:27:57.000000000 +0000
+@@ -97,13 +97,13 @@
+ 	return true;
+ 	}}}
+ 
+-static int res_sources          (sSource *, unsigned char *buf, unsigned len) {{{
++static int res_sources          (sSource *, unsigned char *buf, size_t len) {{{
+ 	tHash    hash;
+ 	unsigned count;
+ 	GET_HASH(&buf, &len, hash);
+ 	count = GET_U2(&buf, &len);
+ 	if (len != count * 12) {{{
+-		printf("%s %i len %i count %i USED %i\n", __FILE__, __LINE__, len, count, count*(4+2+4+2));
++		printf("%s %i len %zi count %i USED %i\n", __FILE__, __LINE__, len, count, count*(4+2+4+2));
+ 		return 0;
+ 		}}}
+ 	for (unsigned i = 0; i < count; i++) {{{
+@@ -366,7 +366,7 @@
+ 	ADD_U4     (&tcp.buf, &tcp.len, 0);
+ //	ADD_U2     (&tcp.buf, &tcp.len, 0);
+ 	if(tcp.len != 0) {
+-		printf("tcp.len = %u\n", tcp.len);
++		printf("tcp.len = %zu\n", tcp.len);
+ 		ASSERT(tcp.len == 0);
+ 		}
+ 	Write(tcp.BUF, tcp.LEN);
+@@ -452,7 +452,7 @@
+ 				return 1;
+ 				}}}
+ 			if (logSend ('>', this, 0xC540, true)) 
+-				printf("%32s (0x40) (%9u-%9lu) %3lu\n", hash_bin2hex(file->hash), von, pack_len, (pack_len*100)/cnt);
++				printf("%32s (0x40) (%9zu-%9lu) %3lu\n", hash_bin2hex(file->hash), von, pack_len, (pack_len*100)/cnt);
+ 			size_t len_real =  6 +  HASH_LEN + 4 + 4 + pack_len;
+ 			ADD_U1   (&buf1, &len1, OP_EMULEPROT);
+ 			ADD_U4   (&buf1, &len1, len_real - PACKET_LEN_SUB);
+@@ -467,7 +467,7 @@
+ 		file->compress_failed ++;
+ 		}}}
+ 	// Not Compressed Handling
+-	if (logSend ('>', this, OP_SENDINGPART, true)) printf("%32s (%9i-%9i)\n", hash_bin2hex(file->hash), von, bis-von);
++	if (logSend ('>', this, OP_SENDINGPART, true)) printf("%32s (%9zi-%9zi)\n", hash_bin2hex(file->hash), von, bis-von);
+ 	file->ulCount (cnt);
+ 	Write (BUF, LEN);
+ 	return 1;
+@@ -554,7 +554,7 @@
+ 		return 0; // if first is always set
+ 		}
+ 	if (proto_log) 
+-		printf("[%9i-%9i][%9i-%9i][%9i-%9i]\n", dl_von[0], dl_bis[0], dl_von[1], dl_bis[1], dl_von[2], dl_bis[2]);
++		printf("[%9zi-%9zi][%9zi-%9zi][%9zi-%9zi]\n", dl_von[0], dl_bis[0], dl_von[1], dl_bis[1], dl_von[2], dl_bis[2]);
+ 	size_t len, LEN = len = 46;
+ 	unsigned char *buf, *BUF = buf = reinterpret_cast<unsigned char*>(alloca(LEN));
+ 	ADD_U1  (&buf, &len, OP_EDONKEYHEADER);
+@@ -575,7 +575,7 @@
+ 	}}}
+ int  sSource::no_such_file         (const tHash &hash ) {{{ // (0x48)
+ 	logSend ('>', this, OP_FILEREQANSNOFIL, false);
+-	unsigned LEN , len = LEN = 22;
++	size_t LEN , len = LEN = 22;
+ 	unsigned char *buf, *BUF = buf = reinterpret_cast<unsigned char*>(alloca(LEN));
+ 	ADD_U1  (&buf, &len, OP_EDONKEYHEADER);
+ 	ADD_U4  (&buf, &len, LEN - PACKET_LEN_SUB);
+@@ -587,7 +587,7 @@
+ 	}}}
+ int  sSource::end_of_download      (void              ) {{{ // (0x49) o.p.
+ 	logSend ('>', this, OP_END_OF_DOWNLOAD, false);
+-	unsigned LEN , len = LEN = 22;
++	size_t LEN , len = LEN = 22;
+ 	unsigned char *buf, *BUF = buf = reinterpret_cast<unsigned char*>(alloca(LEN));
+ 	ADD_U1  (&buf, &len, OP_EDONKEYHEADER);
+ 	ADD_U4  (&buf, &len, LEN - PACKET_LEN_SUB);
+@@ -671,7 +671,7 @@
+ 	dlFile(old_dl);
+ 
+ 	if (logSend('>', this, OP_SETREQFILEID, true)) printf("%32s\n", hash_bin2hex(hash));
+-	unsigned LEN , len = LEN = 22;
++	size_t LEN , len = LEN = 22;
+ 	unsigned char *buf, *BUF = buf = reinterpret_cast<unsigned char*>(alloca(LEN));
+ 	ADD_U1  (&buf, &len, OP_EDONKEYHEADER);
+ 	ADD_U4  (&buf, &len, LEN - PACKET_LEN_SUB);
+@@ -706,7 +706,7 @@
+ 	}}}
+ int  sSource::req_part_hash        (const tHash &hash ) {{{ // (0x51) o.p. <HASH>
+ 	if (logSend('>', this, OP_HASHSETREQUEST, true)) printf("%32s\n", hash_bin2hex(hash));
+-	unsigned LEN , len = LEN = 22;
++	size_t LEN , len = LEN = 22;
+ 	unsigned char *buf, *BUF = buf = reinterpret_cast<unsigned char*>(alloca(LEN));
+ 	ADD_U1  (&buf, &len, OP_EDONKEYHEADER);
+ 	ADD_U4  (&buf, &len, LEN - PACKET_LEN_SUB);
+@@ -738,7 +738,7 @@
+ 	if (next_slot >= currentTime) return 1;
+ 	next_slot = currentTime + 300;
+ 	logSend('>', this, OP_STARTUPLOADREQ, false);
+-	unsigned LEN, len = LEN = 22;
++	size_t LEN, len = LEN = 22;
+ 	unsigned char *buf, *BUF = buf = reinterpret_cast<unsigned char*>(alloca(LEN));
+ 	ADD_U1  (&buf, &len, OP_EDONKEYHEADER);
+ 	ADD_U4  (&buf, &len, LEN - PACKET_LEN_SUB);
+@@ -750,7 +750,7 @@
+ 	}}}
+ int  sSource::CMD_slot_available   (void              ) {{{ // (0x55) o.p. (null)
+ 	logSend('>', this, OP_ACCEPTUPLOADREQ, false);
+-	unsigned LEN, len = LEN = 6;
++	size_t LEN, len = LEN = 6;
+ 	unsigned char *buf, *BUF = buf = reinterpret_cast<unsigned char*>(alloca(LEN));
+ 	ADD_U1(&buf, &len, OP_EDONKEYHEADER);
+ 	ADD_U4(&buf, &len, LEN - PACKET_LEN_SUB);
+@@ -760,7 +760,7 @@
+ 	}}}
+ int  sSource::res_slot_close       (void              ) {{{ // (0x57) o.p. (null)
+ 	logSend('>', this, OP_OUTOFPARTREQS, false);
+-	unsigned LEN, len = LEN = 6;
++	size_t LEN, len = LEN = 6;
+ 	unsigned char *buf, *BUF = buf = reinterpret_cast<unsigned char*>(alloca(LEN));
+ 	ADD_U1(&buf, &len, OP_EDONKEYHEADER);
+ 	ADD_U4(&buf, &len, LEN - PACKET_LEN_SUB);
+@@ -784,7 +784,7 @@
+ 		}
+ 	dlFile(old_dl);
+ 	if (logSend('>', this, OP_FILEREQUEST, true)) printf("%32s\n", hash_bin2hex(hash));
+-	unsigned LEN , len = LEN = 22;
++	size_t LEN , len = LEN = 22;
+ 	unsigned char *buf, *BUF = buf = reinterpret_cast<unsigned char*>(alloca(LEN));
+ 	ADD_U1  (&buf, &len, OP_EDONKEYHEADER);
+ 	ADD_U4  (&buf, &len, LEN - PACKET_LEN_SUB);
+@@ -812,7 +812,7 @@
+ 	}}}
+ int  sSource::C5_res_rang          (uint8_t rang      ) {{{ // (0x60) o.p. <RANG(2)><padding(10)>
+ 	if (logSend ('>', this,0xC560, true)) printf("%hi\n", rang);
+-	unsigned LEN , len = LEN = 18;
++	size_t LEN , len = LEN = 18;
+ 	unsigned char *buf, *BUF = buf = reinterpret_cast<unsigned char*>(alloca(LEN));
+ 	ADD_U1 (&buf, &len, OP_EMULEPROT);
+ 	ADD_U4 (&buf, &len, LEN - PACKET_LEN_SUB);
+@@ -831,7 +831,7 @@
+ 	nextFile (hash, true);	// <- set cursor_count
+ 	if (cursor_count > 512) return 1;
+ 	if(logSend ('>', this , 0xC581, true)) printf("%32s\n", hash_bin2hex(hash));
+-	unsigned LEN , len = LEN = 22;
++	size_t LEN , len = LEN = 22;
+ 	unsigned char *buf, *BUF = buf = reinterpret_cast<unsigned char*>(alloca(LEN));
+ 	ADD_U1  (&buf, &len, OP_EMULEPROT);
+ 	ADD_U4  (&buf, &len, LEN - PACKET_LEN_SUB);
+@@ -875,7 +875,7 @@
+ 	
+ 	if (name == NULL) Name ("(null)");
+ 	if (log) printf("v.%4u NAME: %s e:%i", version, name, eMule);
+-	if (log) printf(" LEN: %i\n", packet->Unused());
++	if (log) printf(" LEN: %zi\n", packet->Unused());
+ 
+ 	if (status == WAIT_HELLO) {
+ 		client_info(0x4C);
+@@ -1002,7 +1002,7 @@
+ 		if (tag->version ==   43) overnet = true;
+ 		if (tag->version == 1044) overnet = true;
+ 		if (tag->name != NULL) 	Name (tag->name);
+-		if (log) printf("v.%4u NAME %s LEN: %i\n", tag->version, tag->name, packet->Unused());
++		if (log) printf("v.%4u NAME %s LEN: %zi\n", tag->version, tag->name, packet->Unused());
+ 		delete tag;
+ 		}
+ 	else	printf("(noTag)\n");
+@@ -1044,7 +1044,7 @@
+ 		no_such_file (hash);
+ 		return 1;
+ 		}
+-	if(logSend ('<', this, OP_SETREQFILEID, true)) printf("%32s OK len:%i\n", hash_bin2hex(hash),packet->Unused());
++	if(logSend ('<', this, OP_SETREQFILEID, true)) printf("%32s OK len:%zi\n", hash_bin2hex(hash),packet->Unused());
+ 	res_part_status (hash);
+ 	return 1;
+ 	}}}
+@@ -1052,12 +1052,12 @@
+ int  sSource::RES_status           (sPacket *packet) {{{ // (0x50) Return file Status
+ 	if (ftp_aktive) return 1;
+ 	if (packet->Unused() <= 18) {{{
+-		printf("MALFORMED PACKET 0x50 from %s LEN %u\n", inet_ntoa(peer_ip), packet->Unused());
++		printf("MALFORMED PACKET 0x50 from %s LEN %zu\n", inet_ntoa(peer_ip), packet->Unused());
+ 		return 0;
+ 		}}}
+ 	tHash hash;
+ 	if (packet->Unused() < 18) {{{
+-		printf("MALFORMED PACKET 0x50 from %15s LEN %5u VERSION %4u NAME %s\n", inet_ntoa(peer_ip), packet->Unused(), version, name);
++		printf("MALFORMED PACKET 0x50 from %15s LEN %5zu VERSION %4u NAME %s\n", inet_ntoa(peer_ip), packet->Unused(), version, name);
+ 		IP_block (peer_ip);
+ 		Close();
+ 		return 0;
+@@ -1165,7 +1165,7 @@
+ 	return 1;
+ 	}}}
+ int  sSource::REQ_slot             (sPacket *packet) {{{ // (0x54)
+-	if (logSend('<', this, OP_STARTUPLOADREQ, true)) printf("len %i\n", packet->Unused());
++	if (logSend('<', this, OP_STARTUPLOADREQ, true)) printf("len %zi\n", packet->Unused());
+ 	extraSend (OP_ACCEPTUPLOADREQ);
+ 	return 1;
+ 	}}}
+--- cDonkey-0.9.0/sServer.cpp.orig	2003-05-07 18:21:34.000000000 +0000
++++ cDonkey-0.9.0/sServer.cpp	2003-11-18 14:34:14.000000000 +0000
+@@ -458,7 +458,7 @@
+ 		// Name speicher
+ 		delete tag;
+ 		unsigned char *ende   = packet->DATA();
+-		printf("Got file info_lei = %i\n", ende - start);
++		printf("Got file info_lei = %ti\n", (ptrdiff_t)(ende - start));
+ 		insertFiles (hash, peer_ip, ende - start, start);
+ 		}
+ 	return 1;
+@@ -523,7 +523,7 @@
+ //			printf ("ed2k://|file|%s|%u|%s|\n", tag->name, tag->size, hash_bin2hex (hash));
+ 		delete tag;
+ 		unsigned char *ende = packet->DATA();
+-		printf("Got file info_len = %i\n", ende - start);
++		printf("Got file info_len = %ti\n", (ptrdiff_t)(ende - start));
+ 		insertFiles (hash, peer_ip, ende - start, start);
+ 		}}}
+ 	return 1;
+@@ -661,7 +661,7 @@
+ 	char		*key;
+ 			 cTreeSearch(void);
+ 			~cTreeSearch(void);
+-	bool		 Parse (unsigned char *data, unsigned len);
++	bool		 Parse (unsigned char *data, size_t len);
+ 	bool		 Match (void) { return false; }
+ 	};
+ cTreeSearch:: cTreeSearch(void) {{{
+@@ -678,7 +678,7 @@
+ 	if (val_str != NULL) Free2 (val_str);
+ 	if (key     != NULL) Free2 (key    );
+ 	}}}
+-bool cTreeSearch::Parse (unsigned char *data, unsigned len) {{{
++bool cTreeSearch::Parse (unsigned char *data, size_t len) {{{
+ 	while (len>0) {
+ 		unsigned new_op = GET_U1 (&data, &len);
+ 		switch (new_op) {
+@@ -723,7 +723,7 @@
+ 			if (NULL != strstr(tag->name, search->val_str)) {
+ 				tHash hash;
+ 				memcpy (hash, f->hash, 16);
+-				printf("MATCH (%3i) for Search %32s - %9u - %s\n", f->info_len, hash_bin2hex(hash), tag->size, tag->name);
++				printf("MATCH (%3zi) for Search %32s - %9u - %s\n", f->info_len, hash_bin2hex(hash), tag->size, tag->name);
+ 
+ 				ADD_HASH(&buffer, &size, hash);
+ 				ADD_U4  (&buffer, &size, 0);
+--- cDonkey-0.9.0/sFile.cpp.orig	2003-05-07 18:21:34.000000000 +0000
++++ cDonkey-0.9.0/sFile.cpp	2003-11-18 14:40:16.000000000 +0000
+@@ -360,7 +360,7 @@
+ 	if (part_count == 0) part_count = (size + PARTSIZE - 1) / PARTSIZE;
+ 	ASSERT (version == 0xE0);
+ 	if (part_count != (size + PARTSIZE - 1) / PARTSIZE) {
+-		printf("%u != %u\n", part_count, (size + PARTSIZE - 1) / PARTSIZE);
++		printf("%zu != %u\n", part_count, (size + PARTSIZE - 1) / PARTSIZE);
+ 		printf("Size %9u\n", size);
+ 		printf("Hash %s\n", hash_bin2hex(hash));
+ 		}
+@@ -519,9 +519,9 @@
+ 	for (it = tree->begin(); it != tree->end(); it++) {{{
+ 		if (it->second->stat == BLOCK_RECIVE || it->second->stat == BLOCK_VERIFY) continue;
+ 		char tag[20];
+-		snprintf(tag, 20, "%c%u",  9, gap_idx);
++		snprintf(tag, 20, "%c%zu",  9, gap_idx);
+ 		add_intTag(&buf, &len, tag, it->second->von);
+-		snprintf(tag, 20, "%c%u", 10, gap_idx);
++		snprintf(tag, 20, "%c%zu", 10, gap_idx);
+ 		add_intTag(&buf, &len, tag, it->second->bis+1);
+ 		gap_idx++;
+ 		tagCount += 2;
+@@ -629,7 +629,7 @@
+ 	}}}
+ bool         sFile::partStatus      (uint32_t idx) const {{{
+ 	if (idx >= part_count) {
+-		printf("sFile::partStatus(%u) => part_count=%u\n", idx, part_count);
++		printf("sFile::partStatus(%u) => part_count=%zu\n", idx, part_count);
+ 		abort();
+ 		}
+ 	ASSERT( idx < part_count);
+@@ -642,7 +642,7 @@
+ 	bool Assert = (ok && (check->stat == BLOCK_VERIFY || check->stat == BLOCK_RECIVE)) || (!ok && check->stat != BLOCK_VERIFY);
+ 	if (!Assert) {
+ 		printf("ok %i\n", ok);
+-		printf("check->stat %i\n", check->stat);
++		printf("check->stat %zi\n", check->stat);
+ 		abort();
+ 		}
+ 	return  (part_status [pos] & flag) != 0;
+@@ -744,12 +744,12 @@
+ 		memcpy(&akt, it1->second, sizeof(dtype));
+ 		if (!running) return;
+ 		if (akt.bis >= size) {
+-			printf("akt.bis %i\n", akt.bis);
++			printf("akt.bis %zi\n", akt.bis);
+ 			printf("size    %u\n", size);
+ 			abort();
+ 			}
+ 		ASSERT (akt.bis <  size);
+-		if (akt.von > akt.bis) printf("akt.von , akt.bis = %9u - %9u\n", akt.von , akt.bis);
++		if (akt.von > akt.bis) printf("akt.von , akt.bis = %9zu - %9zu\n", akt.von , akt.bis);
+ 		ASSERT (akt.von <= akt.bis);		// Check that there is no "defekt" entry
+ 		if (akt.stat == BLOCK_RECIVE) {		// Only care about recived blocks
+ 			ASSERT(akt.bis >= akt.von);
+--- cDonkey-0.9.0/cServer_udp.cpp.orig	2003-05-07 18:21:33.000000000 +0000
++++ cDonkey-0.9.0/cServer_udp.cpp	2003-11-18 14:48:47.000000000 +0000
+@@ -15,7 +15,7 @@
+ 	peer_ip.s_addr = ip.s_addr;
+ 	peer_port =port;
+ 	if (logSend('>', this, OP_REASKFILEPING, true)) printf("%32s\n", hash_bin2hex(file_hash));
+-	unsigned len, LEN = len = 18;
++	size_t len, LEN = len = 18;
+ 	unsigned char *buf, *BUF = buf = reinterpret_cast<unsigned char*>(alloca(LEN));
+ 	ADD_U1   (&buf, &len, OP_EMULEPROT);
+ 	ADD_U1   (&buf, &len, OP_REASKFILEPING);
+@@ -29,7 +29,7 @@
+ 	if (!nextPing (&peer_ip, &peer_port, &quest)) return false;
+ 	peer_port += 4;
+ 	if (logSend('>', this, OP_GLOBSERVSTATREQ, false));
+-	unsigned len, LEN = len = 6;
++	size_t len, LEN = len = 6;
+ 	unsigned char *buf, *BUF = buf = reinterpret_cast<unsigned char*>(alloca(LEN));
+ 	ADD_U1 (&buf, &len, OP_EDONKEYHEADER);
+ 	ADD_U1 (&buf, &len, OP_GLOBSERVSTATREQ);
+@@ -49,7 +49,7 @@
+ 	printf("Extending search to %s %u\n", inet_ntoa(ip), peer_port);
+ 	ASSERT (gui!=NULL);
+ 	if (logSend('>', this, OP_GLOBSEARCHREQ, false));
+-	unsigned len, LEN = len = 2 + gui->searchLen();
++	size_t len, LEN = len = 2 + gui->searchLen();
+ 	unsigned char *buf, *BUF = buf = reinterpret_cast<unsigned char*>(alloca(LEN));
+ 	ADD_U1 (&buf, &len, OP_EDONKEYHEADER);
+ 	ADD_U1 (&buf, &len, OP_GLOBSEARCHREQ);
+@@ -70,7 +70,7 @@
+ 	if (!IP_is_OK (ip)) return false;
+ 	if (logSend('>', this, OP_GLOBGETSOURCES, true)) printf("%32s\n", hash_bin2hex(Hash));
+ 	actionServer    (ip, port);
+-	unsigned len, LEN = len = 18;
++	size_t len, LEN = len = 18;
+ 	unsigned char *buf, *BUF = buf = reinterpret_cast<unsigned char*>(alloca(LEN));
+ 	ADD_U1   (&buf, &len, OP_EDONKEYHEADER);
+ 	ADD_U1   (&buf, &len, OP_GLOBGETSOURCES);
+@@ -81,7 +81,7 @@
+ 	}}}
+ bool cServer_udp::UDP_req_callback  (uint32_t idx) {{{ // (0x9C)
+ 	if (logSend('>', this, OP_GLOBCALLBACKREQ, true)) printf("%u\n", idx);	
+-	unsigned len, LEN = len = 12;
++	size_t len, LEN = len = 12;
+ 	unsigned char *buf, *BUF = buf = reinterpret_cast<unsigned char*>(alloca(LEN));
+ 	ADD_U1 (&buf, &len, OP_EDONKEYHEADER	);
+ 	ADD_U1 (&buf, &len, OP_GLOBCALLBACKREQ	);
+@@ -96,7 +96,7 @@
+ 	peer_ip    = ip;
+ 	peer_port  = port + 4;
+ 	if (logSend('>', this, OP_SERVER_DESC_REQ, false));
+-	unsigned len, LEN = len = 2;
++	size_t len, LEN = len = 2;
+ 	unsigned char *buf, *BUF = buf = reinterpret_cast<unsigned char*>(alloca(LEN));
+ 	ADD_U1   (&buf, &len, OP_EDONKEYHEADER);
+ 	ADD_U1   (&buf, &len, OP_SERVER_DESC_REQ);
+@@ -108,7 +108,7 @@
+ 	peer_port = port + 4;
+ 	peer_ip   = ip;
+ 	if (logSend('>', this, OP_SERVER_LIST_REQ, false));
+-	unsigned len, LEN = len = 2;
++	size_t len, LEN = len = 2;
+ 	unsigned char *buf, *BUF = buf = reinterpret_cast<unsigned char*>(alloca(LEN));
+ 	ADD_U1   (&buf, &len, OP_EDONKEYHEADER);
+ 	ADD_U1   (&buf, &len, OP_SERVER_LIST_REQ);
+@@ -250,7 +250,7 @@
+ 		GET_U2  (&data, &len);
+ 		class sTag *tag = parse_tag       (data, &len);
+ 		if (tag == NULL) return 0;
+-		printf("Found file with %i info len %s\n", len, tag->name);
++		printf("Found file with %zi info len %s\n", len, tag->name);
+ 		insertFiles (hash, peer_ip, len, data);
+ 		LEN  -= len;
+ 		data += len;
+@@ -303,7 +303,7 @@
+ 	GET_HASH(&data, &in_len, hash);
+ 	sFile *file = forHash(hash);
+ 	if (file == NULL) {
+-		unsigned len, LEN = len = 2;
++		size_t len, LEN = len = 2;
+ 		unsigned char *buf, *BUF = buf = reinterpret_cast<unsigned char*>(alloca(LEN));
+ 		ADD_U1 (&buf, &len, OP_EDONKEYHEADER);
+ 		ADD_U1 (&buf, &len, OP_FILENOTFOUND);
+@@ -312,7 +312,7 @@
+ 		return 1;
+ 		}
+ 	else {
+-		unsigned len, LEN = len = 4;
++		size_t len, LEN = len = 4;
+ 		unsigned char *buf, *BUF = buf = reinterpret_cast<unsigned char*>(alloca(LEN));
+ 		ADD_U1 (&buf, &len, OP_EDONKEYHEADER);
+ 		ADD_U1 (&buf, &len, OP_REASKACK);
+--- cDonkey-0.9.0/cSocket.cpp.orig	2003-11-18 14:05:47.000000000 +0000
++++ cDonkey-0.9.0/cSocket.cpp	2003-11-18 14:47:05.000000000 +0000
+@@ -624,7 +624,7 @@
+     	srv_addr.sin_port   = htons(0);
+     	if (0 != bind(fd, reinterpret_cast<struct sockaddr*>(&srv_addr), sizeof(srv_addr))) {{{
+ 		int err = GetErrno();
+-	        printf("bind(%i,  %15s:%5u <%u>, %u) => %s\n", fd, inet_ntoa(srv_addr.sin_addr), htons(srv_addr.sin_port), type, 
++	        printf("bind(%i,  %15s:%5u <%u>, %zu) => %s\n", fd, inet_ntoa(srv_addr.sin_addr), htons(srv_addr.sin_port), type, 
+ 				sizeof(srv_addr),cSocket::Strerror(err));
+ 		addEvent(16);
+ 		assert(0);
+@@ -693,7 +693,7 @@
+ #endif
+ 	if (0 != bind(fd, reinterpret_cast<struct sockaddr*>(&client_addr), sizeof(client_addr))) {
+ 		int err = GetErrno();
+-	        printf("bind(%i,  %15s:%5u <%u>, %u) => %s\n", fd, inet_ntoa(client_addr.sin_addr), htons(client_addr.sin_port), type, 
++	        printf("bind(%i,  %15s:%5u <%u>, %zu) => %s\n", fd, inet_ntoa(client_addr.sin_addr), htons(client_addr.sin_port), type, 
+ 			sizeof(client_addr),cSocket::Strerror(err));
+ 		addEvent(16);
+ 		return;
+@@ -727,7 +727,7 @@
+ 	shutdown (fd, 2);
+ 	if (fd != INVALID_SOCKET) g_SocketMap.erase(fd);
+ 	if (g_SocketMap.size() != count)
+-	  printf("WARNING: SocketMap: %d count: %d\n", g_SocketMap.size(),count);
++	  printf("WARNING: SocketMap: %zd count: %zd\n", g_SocketMap.size(),count);
+ 	ASSERT (fd != -1); 
+ 	printf("(destr.)closing fd: %u this: %p:\n", fd, this);
+ 	closesocket(fd);
+@@ -981,7 +981,7 @@
+ 				return false;
+ 				}
+ 			printf("IP 13 %s\n", inet_ntoa(addr.sin_addr));
+-			printf("LEN %i\n", len);
++			printf("LEN %zi\n", len);
+ 			if (err == 13) printf("IP 13 %s\n", inet_ntoa(addr.sin_addr));
+ 			printf("fd: %u this %p:\n", fd, this);
+ 			printError(err);
+--- cDonkey-0.9.0/cHTTP.cpp.orig	2003-05-03 19:48:49.000000000 +0000
++++ cDonkey-0.9.0/cHTTP.cpp	2003-11-18 14:56:49.000000000 +0000
+@@ -213,7 +213,7 @@
+ 						"<td class=hash		>%s</td>"
+ 						"<td class=name		>%s</td>"
+ 						"<td class=size		>%u</td>"
+-						"<td class=transfered	>%u</td>"
++						"<td class=transfered	>%zu</td>"
+ 					"</div>", cnt, hash_bin2hex(akt->hash),akt->Name(), akt->size, akt->transfered
+ 				      ));
+ 				}
+--- cDonkey-0.9.0/misc.cpp.orig	2003-05-07 18:21:34.000000000 +0000
++++ cDonkey-0.9.0/misc.cpp	2003-11-18 14:34:46.000000000 +0000
+@@ -688,7 +688,7 @@
+ 		ADD_U4 (&cnt_idx, &cnt_len, tag_count);
+ 		}
+ 	DB_c_close(c);
+-	if (count != 0) printf("Wrong count %u\n", count);
++	if (count != 0) printf("Wrong count %zu\n", count);
+ 	int fd = FD_create ("server.met.new", O_WRONLY|O_BINARY|O_TRUNC|O_CREAT,0600);
+ 	if (fd == -1) {{{
+ 		printf ("server.met.new not open\n");
+--- cDonkey-0.9.0/donkey.h.orig	2003-05-01 15:21:23.000000000 +0000
++++ cDonkey-0.9.0/donkey.h	2003-11-18 15:04:45.000000000 +0000
+@@ -20,7 +20,7 @@
+ #define LOG_ZEILE	printf("%s %i\n", __FILE__, __LINE__); fflush(stdout);
+ // #define LOG_ZEILE ;
+ 
+-extern unsigned int     TCP_CLIENT_COUNT;
++extern size_t           TCP_CLIENT_COUNT;
+ extern unsigned int     TCP_SERVER_COUNT;
+ extern unsigned int 	CLIENT_COUNT;
+ 
