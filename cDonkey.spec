@@ -6,6 +6,7 @@ Release:	1
 License:	GPL
 Group:		Applications/Communications
 Source0:	http://suche.org/%{name}-%{version}.tar.bz2
+# Source0-md5:	a1a5eb43697b8f098f80709f017ab84c
 URL:		http://cdonkey.suche.org/
 BuildRequires:	autoconf
 BuildRequires:	automake
