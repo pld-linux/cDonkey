@@ -17,8 +17,8 @@ BuildRequires:	db-devel >= 4.1
 BuildRequires:	libstdc++-devel
 BuildRequires:	libtool
 BuildRequires:	zlib-devel
-BuildRoot:	%{tmpdir}/%{name}-%{version}-root-%(id -u -n)
 Provides:	eDonkey-core
+BuildRoot:	%{tmpdir}/%{name}-%{version}-root-%(id -u -n)
 
 %description
 cDonkey is an open source core client for eDonkey without a GUI. It
