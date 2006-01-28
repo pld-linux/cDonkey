@@ -10,6 +10,7 @@ Source0:	http://suche.org/%{name}-%{version}.tar.bz2
 Patch0:		%{name}-in_addr.patch
 Patch1:		%{name}-types.patch
 Patch2:		%{name}-nolibs.patch
+Patch3:		%{name}-db.patch
 URL:		http://cdonkey.suche.org/
 BuildRequires:	autoconf
 BuildRequires:	automake
@@ -22,20 +23,21 @@ BuildRoot:	%{tmpdir}/%{name}-%{version}-root-%(id -u -n)
 
 %description
 cDonkey is an open source core client for eDonkey without a GUI. It
-works together with eMule and ed2k_gui. It uses Berkeley DB-4.1 for
-fast List management. The eMule Packet data and source2source exchange
-was implemented. It currently only works with Linux.
+works together with eMule and ed2k_gui. It uses Berkeley DB for fast
+List management. The eMule Packet data and source2source exchange was
+implemented. It currently only works with Linux.
 
 %description -l pl
 cDonkey jest otwartym rdzeniem klienta sieci eDonkey bez interfejsu
-graficznego. Wspó³gra z eMule oraz ed2k_gui. U¿ywa bazy Berkeley w
-wersji 4.1 do szybkiego zarz±dzania listami. Dzia³a tylko na Linuksie.
+graficznego. Wspó³gra z eMule oraz ed2k_gui. U¿ywa bazy Berkeley DB
+do szybkiego zarz±dzania listami. Dzia³a tylko na Linuksie.
 
 %prep
 %setup -q
 %patch0 -p1
 %patch1 -p1
 %patch2 -p1
+%patch3 -p1
 
 %build
 %{__libtoolize}
