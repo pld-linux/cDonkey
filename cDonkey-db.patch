@@ -1,0 +1,23 @@
+--- cDonkey-0.9.0/db_macro.h.orig	2003-05-01 17:21:23.000000000 +0200
++++ cDonkey-0.9.0/db_macro.h	2006-01-29 00:02:01.652279750 +0100
+@@ -15,7 +15,7 @@
+ #define DB_associate(db,sec,key,art)       db->associate(db, sec, key, art)
+ #endif
+ 
+-#if (DB_VERSION_MAJOR == 4 && DB_VERSION_MINOR == 1)
++#if (DB_VERSION_MAJOR == 4 && DB_VERSION_MINOR >= 1)
+ #define DB_open(db,loc,name,type,art,mode) db->open(db, NULL, loc, name, type, art, mode)
+ #define DB_associate(db,sec,key,art)       db->associate(db, NULL, sec, key, art)
+ #endif
+@@ -43,7 +43,11 @@
+ #define DB_associate2(db,sec,key) 		if (0 != (err = DB_associate(db,sec,key,DB_CREATE))) DB_error()
+ #define DB_set_cachesize2(db,len)		if (0 != (err = DB_set_cachesize(db,len		 ))) DB_error()
+ #define DB_set_bt_compare2(db,cmp)		if (0 != (err = DB_set_bt_compare(db ,cmp	 ))) DB_error()
++#if (DB_VERSION_MAJOR == 4 && DB_VERSION_MINOR >= 3)
++#define DB_stat(db,info)			if (0 != (err = db->stat(db, NULL, &info, 0	 ))) DB_error()
++#else
+ #define DB_stat(db,info)			if (0 != (err = db->stat(db, &info, 0		 ))) DB_error()
++#endif
+ #define DB_del2(db,key)				if (0 != (err = DB_del (db, key			 ))) if (err != DB_NOTFOUND) DB_error()
+ #define DB_set_flags2(db,flag)			if (0 != (err = DB_set_flags (db, flag		 ))) DB_error()
+ 
