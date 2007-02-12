@@ -1,5 +1,5 @@
 Summary:	Open source core client for eDonkey
-Summary(pl.UTF-8):   Otwarty rdzeń klienta sieci eDonkey
+Summary(pl.UTF-8):	Otwarty rdzeń klienta sieci eDonkey
 Name:		cDonkey
 Version:	0.9.0
 Release:	3
