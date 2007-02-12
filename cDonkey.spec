@@ -1,5 +1,5 @@
 Summary:	Open source core client for eDonkey
-Summary(pl):	Otwarty rdzeñ klienta sieci eDonkey
+Summary(pl.UTF-8):   Otwarty rdzeÅ„ klienta sieci eDonkey
 Name:		cDonkey
 Version:	0.9.0
 Release:	3
@@ -27,10 +27,10 @@ works together with eMule and ed2k_gui. It uses Berkeley DB for fast
 List management. The eMule Packet data and source2source exchange was
 implemented. It currently only works with Linux.
 
-%description -l pl
+%description -l pl.UTF-8
 cDonkey jest otwartym rdzeniem klienta sieci eDonkey bez interfejsu
-graficznego. Wspó³gra z eMule oraz ed2k_gui. U¿ywa bazy Berkeley DB
-do szybkiego zarz±dzania listami. Dzia³a tylko na Linuksie.
+graficznego. WspÃ³Å‚gra z eMule oraz ed2k_gui. UÅ¼ywa bazy Berkeley DB
+do szybkiego zarzÄ…dzania listami. DziaÅ‚a tylko na Linuksie.
 
 %prep
 %setup -q
